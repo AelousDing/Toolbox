@@ -13,7 +13,7 @@
 </view>-->
 <view>
   <text>小写金额：</text>
-  <view>
-    <input type='digit' placeholder='请输入小写金额'></input>
+  <view style='border-top: 1rpx solid #D9D9D9;'>
+    <input type='digit' placeholder='请输入小写金额' style='border-width:1px;border-color:red'></input>
   </view>
 </view>
