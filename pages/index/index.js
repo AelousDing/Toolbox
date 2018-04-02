@@ -1,74 +1,158 @@
 //index.js
 //获取应用实例
 const app = getApp()
-var amountTem
+
 Page({
   data: {
-    motto: 'Hello World',
-    userInfo: {},
-    hasUserInfo: false,
-    canIUse: wx.canIUse('button.open-type.getUserInfo'),
-    amount:""
-  },
-  //事件处理函数
-  bindViewTap: function () {
-    wx.navigateTo({
-      url: '../logs/logs'
-    })
-  },
-  onLoad: function () {
-    if (app.globalData.userInfo) {
-      this.setData({
-        userInfo: app.globalData.userInfo,
-        hasUserInfo: true
-      })
-    } else if (this.data.canIUse) {
-      // 由于 getUserInfo 是网络请求，可能会在 Page.onLoad 之后才返回
-      // 所以此处加入 callback 以防止这种情况
-      app.userInfoReadyCallback = res => {
-        this.setData({
-          userInfo: res.userInfo,
-          hasUserInfo: true
-        })
-      }
-    } else {
-      // 在没有 open-type=getUserInfo 版本的兼容处理
-      wx.getUserInfo({
-        success: res => {
-          app.globalData.userInfo = res.userInfo
-          this.setData({
-            userInfo: res.userInfo,
-            hasUserInfo: true
-          })
-        }
-      })
-    }
-  },
-  getUserInfo: function (e) {
-    console.log(e)
-    app.globalData.userInfo = e.detail.userInfo
-    this.setData({
-      userInfo: e.detail.userInfo,
-      hasUserInfo: true
-    })
+    amount: "",
+    amountTem: ""
   },
   transform: function (e) {
-    wx.showModal({
-      title: "消息",
-      content: amountTem,
-      showCancel:false
-    });
-    /*wx.showToast({
-      title: '数据格式输入不正确。',
-      icon:'none',
-    });*/
-    
+    //转化
+    var currency = this.convertCurrency(this.data.amountTem);
     this.setData({
-      caption: "ddddd",
+      caption: currency,
     });
   },
-  
-  amountlostfouce:function(e){
-amountTem=e.detail.value;
+  amountlostfouce: function (e) {
+    this.data.amountTem = e.detail.value;
+  },
+
+  convertCurrency: function (currencyDigits) {
+    // Constants: 
+    var MAXIMUM_NUMBER = 99999999999.99;
+    // Predefine the radix characters and currency symbols for output: 
+    var CN_ZERO = "零";
+    var CN_ONE = "壹";
+    var CN_TWO = "贰";
+    var CN_THREE = "叁";
+    var CN_FOUR = "肆";
+    var CN_FIVE = "伍";
+    var CN_SIX = "陆";
+    var CN_SEVEN = "柒";
+    var CN_EIGHT = "捌";
+    var CN_NINE = "玖";
+    var CN_TEN = "拾";
+    var CN_HUNDRED = "佰";
+    var CN_THOUSAND = "仟";
+    var CN_TEN_THOUSAND = "万";
+    var CN_HUNDRED_MILLION = "亿";
+    var CN_SYMBOL = "";
+    var CN_DOLLAR = "元";
+    var CN_TEN_CENT = "角";
+    var CN_CENT = "分";
+    var CN_INTEGER = "整";
+
+    // Variables: 
+    var integral;    // Represent integral part of digit number. 
+    var decimal;    // Represent decimal part of digit number. 
+    var outputCharacters;    // The output result. 
+    var parts;
+    var digits, radices, bigRadices, decimals;
+    var zeroCount;
+    var i, p, d;
+    var quotient, modulus;
+
+    // Validate input string: 
+    currencyDigits = currencyDigits.toString();
+    if (currencyDigits == "") {
+      wx.showModal({
+        title: "消息",
+        content: "请输入需要转换的金额。",
+        showCancel: false
+      });
+      return "";
+    }
+    if (currencyDigits.match(/[^,.\d]/) != null) {
+      wx.showModal({
+        title: "消息",
+        content: "输入字符串中的字符无效。",
+        showCancel: false
+      });
+      return "";
+    }
+    if ((currencyDigits).match(/^((\d{1,3}(,\d{3})*(.((\d{3},)*\d{1,3}))?)|(\d+(.\d+)?))$/) == null) {
+      wx.showModal({
+        title: '消息',
+        content: '请输入正确的数字金额.',
+        showCancel: false
+      })
+      return "";
+    }
+
+    // Normalize the format of input digits: 
+    currencyDigits = currencyDigits.replace(/,/g, "");    // Remove comma delimiters. 
+    currencyDigits = currencyDigits.replace(/^0+/, "");    // Trim zeros at the beginning. 
+    // Assert the number is not greater than the maximum number. 
+    if (Number(currencyDigits) > MAXIMUM_NUMBER) {
+      wx.showModal({
+        title: '消息',
+        content: 'Too large a number to convert!',
+      })
+      return "";
+    }
+
+    // Process the coversion from currency digits to characters: 
+    // Separate integral and decimal parts before processing coversion: 
+    parts = currencyDigits.split(".");
+    if (parts.length > 1) {
+      integral = parts[0];
+      decimal = parts[1];
+      // Cut down redundant decimal digits that are after the second. 
+      decimal = decimal.substr(0, 2);
+    }
+    else {
+      integral = parts[0];
+      decimal = "";
+    }
+    // Prepare the characters corresponding to the digits: 
+    digits = new Array(CN_ZERO, CN_ONE, CN_TWO, CN_THREE, CN_FOUR, CN_FIVE, CN_SIX, CN_SEVEN, CN_EIGHT, CN_NINE);
+    radices = new Array("", CN_TEN, CN_HUNDRED, CN_THOUSAND);
+    bigRadices = new Array("", CN_TEN_THOUSAND, CN_HUNDRED_MILLION);
+    decimals = new Array(CN_TEN_CENT, CN_CENT);
+    // Start processing: 
+    outputCharacters = "";
+    // Process integral part if it is larger than 0: 
+    if (Number(integral) > 0) {
+      zeroCount = 0;
+      for (i = 0; i < integral.length; i++) {
+        p = integral.length - i - 1;
+        d = integral.substr(i, 1);
+        quotient = p / 4;
+        modulus = p % 4;
+        if (d == "0") {
+          zeroCount++;
+        }
+        else {
+          if (zeroCount > 0) {
+            outputCharacters += digits[0];
+          }
+          zeroCount = 0;
+          outputCharacters += digits[Number(d)] + radices[modulus];
+        }
+        if (modulus == 0 && zeroCount < 4) {
+          outputCharacters += bigRadices[quotient];
+        }
+      }
+      outputCharacters += CN_DOLLAR;
+    }
+    // Process decimal part if there is: 
+    if (decimal != "") {
+      for (i = 0; i < decimal.length; i++) {
+        d = decimal.substr(i, 1);
+        if (d != "0") {
+          outputCharacters += digits[Number(d)] + decimals[i];
+        }
+      }
+    }
+    // Confirm and return the final output string: 
+    if (outputCharacters == "") {
+      outputCharacters = CN_ZERO + CN_DOLLAR;
+    }
+    if (decimal == "") {
+      outputCharacters += CN_INTEGER;
+    }
+    outputCharacters = CN_SYMBOL + outputCharacters;
+    return outputCharacters;
   }
 })
