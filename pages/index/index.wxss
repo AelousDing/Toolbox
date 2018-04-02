@@ -19,3 +19,27 @@
 .usermotto {
   margin-top: 200px;
 }
+.v-Container{
+  display: flex;
+  margin: 20rpx;
+  align-items: center;
+}
+.h-Container{
+  display: flex;
+  margin: 20rpx;
+}
+.four-border-input{
+  border: 1rpx solid #353535;
+  height: 2.58823529em;
+  min-height: 2.58823529em;
+  line-height: 2.58823529em;
+  flex: 1;
+}
+.button-transform{
+  margin: 20rpx;
+}
+.text-box{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

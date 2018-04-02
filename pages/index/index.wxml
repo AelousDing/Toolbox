@@ -11,9 +11,20 @@
     <text class="user-motto">{{motto}}</text>
   </view>
 </view>-->
-<view>
-  <text>小写金额：</text>
-  <view style='border-top: 1rpx solid #D9D9D9;'>
-    <input type='digit' placeholder='请输入小写金额' style='border-width:1px;border-color:red'></input>
+<view class='v-container'>
+  <view class='h-Container'>
+    <view class='text-box'>
+      <text>小写金额：</text>
+    </view>
+    <input class='four-border-input' type='digit' placeholder='请输入小写金额' value='{{amount}}' bindinput='amountlostfouce'></input>
+  </view>
+  <view class='h-Container'>
+    <view class='text-box'>
+      <text>大写金额：</text>
+    </view>
+    <input class='four-border-input' type='text' value='{{caption}}'></input>
+  </view>
+  <view>
+    <button class='button-transform' type="primary" plain="true" bindtap='transform'>转换</button>
   </view>
 </view>
